@@ -1,10 +1,11 @@
 package ru.job4j.auth.controller;
 
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.job4j.auth.model.Person;
-import ru.job4j.auth.repository.PersonRepository;
+import ru.job4j.auth.service.PersonService;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,12 +13,9 @@ import java.util.stream.StreamSupport;
 
 @RestController
 @RequestMapping("/person")
+@AllArgsConstructor
 public class PersonController {
-    private final PersonRepository persons;
-
-    public PersonController(final PersonRepository persons) {
-        this.persons = persons;
-    }
+    private final PersonService persons;
 
     @GetMapping("/")
     public List<Person> findAll() {
@@ -35,15 +33,22 @@ public class PersonController {
 
     @PostMapping("/")
     public ResponseEntity<Person> create(@RequestBody Person person) {
+        var isCreated = persons.save(person);
+        if (isCreated.isEmpty()) {
+            return new ResponseEntity<Person>(new Person(), HttpStatus.CONFLICT);
+        }
         return new ResponseEntity<Person>(
-                this.persons.save(person),
+                isCreated.get(),
                 HttpStatus.CREATED
         );
     }
 
     @PutMapping("/")
     public ResponseEntity<Void> update(@RequestBody Person person) {
-        this.persons.save(person);
+        var isUpdated = persons.update(person);
+        if (!isUpdated) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok().build();
     }
 
@@ -51,7 +56,10 @@ public class PersonController {
     public ResponseEntity<Void> delete(@PathVariable int id) {
         Person person = new Person();
         person.setId(id);
-        this.persons.delete(person);
+        var isDeleted = persons.delete(person);
+        if (!isDeleted) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok().build();
     }
 }

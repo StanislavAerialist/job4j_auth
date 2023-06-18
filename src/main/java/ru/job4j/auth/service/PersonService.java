@@ -15,4 +15,6 @@ public interface PersonService {
     List<Person> findAll();
 
     Optional<Person> findById(int id);
+
+    Optional<Person> findByLogin(String login);
 }

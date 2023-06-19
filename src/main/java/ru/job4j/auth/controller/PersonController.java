@@ -6,11 +6,11 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.auth.model.Person;
 import ru.job4j.auth.service.PersonService;
+import ru.job4j.auth.util.PassEncoderHandler;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -23,7 +23,7 @@ import java.util.List;
 @AllArgsConstructor
 public class PersonController {
     private final PersonService persons;
-    private BCryptPasswordEncoder encoder;
+    private PassEncoderHandler encoder;
     private static final Logger LOG = LogManager.getLogger(PersonController.class.getName());
     private final ObjectMapper objectMapper;
 
@@ -55,7 +55,7 @@ public class PersonController {
         if (password.length() < 3) {
             throw new IllegalArgumentException("Invalid password. Password length can't be less than 3 characters.");
         }
-        person.setPassword(encoder.encode(person.getPassword()));
+        person.setPassword(encoder.passwordEncoder().encode(person.getPassword()));
         var isCreated = persons.save(person);
         if (isCreated.isEmpty()) {
             return new ResponseEntity<Person>(new Person(), HttpStatus.CONFLICT);

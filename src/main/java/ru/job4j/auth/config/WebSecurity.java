@@ -8,7 +8,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -16,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import ru.job4j.auth.filter.JWTAuthenticationFilter;
 import ru.job4j.auth.filter.JWTAuthorizationFilter;
 import ru.job4j.auth.service.SimplePersonService;
+import ru.job4j.auth.util.PassEncoderHandler;
 
 import static ru.job4j.auth.filter.JWTAuthenticationFilter.SIGN_UP_URL;
 
@@ -25,7 +25,7 @@ import static ru.job4j.auth.filter.JWTAuthenticationFilter.SIGN_UP_URL;
 @Configuration
 public class WebSecurity extends WebSecurityConfigurerAdapter {
     private SimplePersonService userDetailsService;
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private PassEncoderHandler bCryptPasswordEncoder;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -41,7 +41,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
+        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder.passwordEncoder());
     }
 
     @Bean

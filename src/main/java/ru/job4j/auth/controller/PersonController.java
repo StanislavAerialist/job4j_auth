@@ -6,11 +6,13 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.job4j.auth.dto.PersonDto;
 import ru.job4j.auth.model.Person;
 import ru.job4j.auth.service.PersonService;
+import ru.job4j.auth.util.Operation;
 import ru.job4j.auth.util.PassEncoderHandler;
 
 import javax.servlet.http.HttpServletRequest;
@@ -44,18 +46,7 @@ public class PersonController {
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<Person> create(@RequestBody Person person) {
-        var login = person.getLogin();
-        var password = person.getPassword();
-        if (login == null || password == null) {
-            throw new NullPointerException("Login and password can't be null");
-        }
-        if (login.length() < 3) {
-            throw new IllegalArgumentException("Invalid login. Login length can't be less than 3 characters.");
-        }
-        if (password.length() < 3) {
-            throw new IllegalArgumentException("Invalid password. Password length can't be less than 3 characters.");
-        }
+    public ResponseEntity<Person> create(@Validated(Operation.OnCreate.class)@RequestBody Person person) {
         person.setPassword(encoder.passwordEncoder().encode(person.getPassword()));
         var isCreated = persons.save(person);
         if (isCreated.isEmpty()) {
@@ -68,7 +59,7 @@ public class PersonController {
     }
 
     @PutMapping("/")
-    public ResponseEntity<Void> update(@RequestBody Person person) {
+    public ResponseEntity<Void> update(@Validated(Operation.OnUpdate.class)@RequestBody Person person) {
         var isUpdated = persons.update(person);
         if (!isUpdated) {
             return ResponseEntity.notFound().build();
@@ -77,7 +68,7 @@ public class PersonController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable int id) {
+    public ResponseEntity<Void> delete(@Validated(Operation.OnDelete.class)@PathVariable int id) {
         Person person = new Person();
         person.setId(id);
         var isDeleted = persons.delete(person);
@@ -99,7 +90,7 @@ public class PersonController {
     }
 
     @PatchMapping("/passUpdate")
-    public ResponseEntity<Void> partUpdate(@RequestBody PersonDto personDTO) {
+    public ResponseEntity<Void> partUpdate(@Validated(Operation.OnPassUpdate.class)@RequestBody PersonDto personDTO) {
         personDTO.setPassword(encoder.passwordEncoder().encode(personDTO.getPassword()));
         var passUpdate = persons.passUpdate(personDTO);
         if (!passUpdate) {

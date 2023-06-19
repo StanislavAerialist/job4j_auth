@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import ru.job4j.auth.dto.PersonDto;
 import ru.job4j.auth.model.Person;
 import ru.job4j.auth.service.PersonService;
 import ru.job4j.auth.util.PassEncoderHandler;
@@ -95,5 +96,15 @@ public class PersonController {
             put("type", e.getClass());
         }}));
         LOG.error(e.getLocalizedMessage());
+    }
+
+    @PatchMapping("/passUpdate")
+    public ResponseEntity<Void> partUpdate(@RequestBody PersonDto personDTO) {
+        personDTO.setPassword(encoder.passwordEncoder().encode(personDTO.getPassword()));
+        var passUpdate = persons.passUpdate(personDTO);
+        if (!passUpdate) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok().build();
     }
 }

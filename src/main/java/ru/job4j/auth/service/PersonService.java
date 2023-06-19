@@ -1,5 +1,6 @@
 package ru.job4j.auth.service;
 
+import ru.job4j.auth.dto.PersonDto;
 import ru.job4j.auth.model.Person;
 
 import java.util.List;
@@ -17,4 +18,6 @@ public interface PersonService {
     Optional<Person> findById(int id);
 
     Optional<Person> findByLogin(String login);
+
+    boolean passUpdate(PersonDto personDto);
 }
